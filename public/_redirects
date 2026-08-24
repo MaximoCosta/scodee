@@ -1,0 +1,5 @@
+/index.html  /  301
+/contacto.html  /contacto/  301
+/faq.html  /faq/  301
+/api/*  /api/:splat  200
+/*    /index.html   200

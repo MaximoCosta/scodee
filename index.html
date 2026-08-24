@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sCode | Desarrollo web, branding y SaaS en Mar del Plata</title>
+    <meta name="description" content="Estudio digital en Mar del Plata: desarrollo web, sistemas, branding y SaaS. Diseñamos, construimos y lanzamos sitios y productos con un mismo equipo." />
+    <meta name="keywords" content="desarrollo web Mar del Plata, estudio digital, branding, SaaS, sistemas web, landing page, identidad de marca, Argentina" />
+    <meta name="author" content="sCode" />
+    <meta name="robots" content="index, follow" />
+    <meta name="googlebot" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />
+    <meta name="theme-color" content="#F2F3F5" />
+    <script>
+      (function () {
+        try {
+          var stored = localStorage.getItem("scode-theme");
+          var theme =
+            stored === "dark" || stored === "light"
+              ? stored
+              : window.matchMedia("(prefers-color-scheme: dark)").matches
+                ? "dark"
+                : "light";
+          document.documentElement.setAttribute("data-theme", theme);
+          document.documentElement.style.colorScheme = theme;
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (meta) {
+            meta.setAttribute("content", theme === "dark" ? "#0F1118" : "#F2F3F5");
+          }
+        } catch (e) {}
+      })();
+    </script>
+    <meta name="google-site-verification" content="i9jeek6MjFcS0gtaPAZb8osoUfmkOG5jbZtIPHC3Xcg" />
+    <link rel="canonical" href="https://scodedigital.com/" />
+    <link rel="alternate" href="https://scodedigital.com/" hreflang="es" />
+    <link rel="alternate" href="https://scodedigital.com/" hreflang="es-AR" />
+    <link rel="alternate" href="https://scodedigital.com/" hreflang="x-default" />
+    <link rel="icon" type="image/png" href="/frontEnd/images/Scodelogotipo.png" />
+    <link rel="apple-touch-icon" href="/frontEnd/images/Scodelogotipo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&family=JetBrains+Mono:wght@400;500&family=Space+Grotesk:wght@500;600&display=swap" rel="stylesheet" />
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="es_AR" />
+    <meta property="og:site_name" content="sCode" />
+    <meta property="og:title" content="sCode | Código, marca y producto" />
+    <meta property="og:description" content="Estudio digital que une código, marca y producto. Diseñamos, construimos y lanzamos webs, sistemas y marcas." />
+    <meta property="og:url" content="https://scodedigital.com/" />
+    <meta property="og:image" content="https://scodedigital.com/frontEnd/images/hero.png" />
+    <meta property="og:image:alt" content="sCode — desarrollo web, branding y producto digital" />
+    <meta property="og:image:width" content="2171" />
+    <meta property="og:image:height" content="1309" />
+    <meta property="og:image:type" content="image/png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="sCode | Código, marca y producto" />
+    <meta name="twitter:description" content="Estudio digital: webs, sistemas, branding y SaaS en un mismo equipo." />
+    <meta name="twitter:image" content="https://scodedigital.com/frontEnd/images/hero.png" />
+    <meta name="twitter:image:alt" content="sCode — desarrollo web, branding y producto digital" />
+    <script type="application/ld+json" data-seo="jsonld"></script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>
