@@ -14,13 +14,14 @@ import { getHomeJsonLd, pages } from "../seo";
 
 const projects = [
   {
-    href: "https://francescoramirez.github.io/landingteleinformatica/frontEnd/index.html",
-    title: "Ver Landing Page de Teleinformática",
+    href: "https://s-architeqture.vercel.app/",
+    title: "Ver Landing Page de sArchiteqture",
     image: "/frontEnd/images/sArqitecture.png",
-    alt: "Ejemplo de landing page para marca personal",
+    alt: "Sitio web de sArchiteqture, estudio de arquitectura",
     meta: "ejemplo · landing",
-    heading: "Marca personal para consultora",
-    body: "Sitio claro, secciones orientadas a conversión y formulario para captar consultas.",
+    heading: "sArchiteqture",
+    body: "Web para estudio de arquitectura: proyectos, servicios y contacto, con foco visual en obra contemporánea.",
+    imageLabel: "sArchiteqture",
   },
   {
     href: "https://landing-sk-nine.vercel.app/",
@@ -229,10 +230,6 @@ export function Home() {
         <div className="textos">
           <p className="eyebrow">Ejemplos</p>
           <h2>Lo que podemos crear para vos</h2>
-          <p>
-            Ejemplos de sitios, sistemas y productos. Aún no son casos publicados: son el tipo de
-            trabajo que hacemos.
-          </p>
         </div>
 
         <div className="proyectos-grid">
@@ -251,6 +248,9 @@ export function Home() {
                     loading="lazy"
                     decoding="async"
                   />
+                  {project.imageLabel ? (
+                    <span className="proyecto-image-label">{project.imageLabel}</span>
+                  ) : null}
                 </div>
                 <div className="proyecto-info">
                   <span>{project.meta}</span>
