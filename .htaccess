@@ -18,6 +18,7 @@ RewriteRule ^contacto\.html$ /contacto/ [R=301,L]
 RewriteCond %{THE_REQUEST} \s/+faq\.html[\s?] [NC]
 RewriteRule ^faq\.html$ /faq/ [R=301,L]
 
+RewriteRule ^api/contacto/?$ api/contacto.php [L]
 RewriteRule ^api/ - [L]
 
 RewriteCond %{REQUEST_FILENAME} !-f

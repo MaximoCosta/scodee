@@ -56,8 +56,115 @@
     <meta name="twitter:image" content="https://scodedigital.com/frontEnd/images/hero.png" />
     <meta name="twitter:image:alt" content="sCode — desarrollo web, branding y producto digital" />
     <script type="application/ld+json" data-seo="jsonld"></script>
+    <style>
+      .intro-loader {
+        position: fixed;
+        inset: 0;
+        z-index: 2147483000;
+        display: grid;
+        place-items: center;
+        background: #0a0c12;
+        pointer-events: none;
+        animation: introLoaderOut 0.9s cubic-bezier(0.76, 0, 0.24, 1) 1.15s forwards;
+      }
+      .intro-loader-mark {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        animation: introLoaderMark 0.45s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+      }
+      .intro-loader-brace {
+        color: #6b63f0;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: clamp(48px, 9vw, 76px);
+        font-weight: 500;
+        line-height: 1;
+        animation: introBraceLeft 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.25s both;
+      }
+      .intro-loader-brace + .intro-loader-word + .intro-loader-brace {
+        animation-name: introBraceRight;
+      }
+      .intro-loader-word {
+        display: flex;
+        flex-direction: column;
+        max-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        opacity: 0;
+        animation: introWord 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.4s forwards;
+      }
+      .intro-loader-main {
+        color: #f2f3f5;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: clamp(34px, 6.4vw, 54px);
+        font-weight: 600;
+        letter-spacing: -0.03em;
+        line-height: 0.95;
+      }
+      .intro-loader-sub {
+        color: #9aa1b3;
+        font-family: "JetBrains Mono", ui-monospace, monospace;
+        font-size: clamp(10px, 1.6vw, 13px);
+        letter-spacing: 0.16em;
+        line-height: 1.6;
+      }
+      @keyframes introLoaderOut {
+        to {
+          transform: translateY(-100%);
+          visibility: hidden;
+        }
+      }
+      @keyframes introLoaderMark {
+        from {
+          opacity: 0;
+          transform: translateY(12px);
+        }
+      }
+      @keyframes introBraceLeft {
+        from {
+          transform: translateX(14px);
+        }
+      }
+      @keyframes introBraceRight {
+        from {
+          transform: translateX(-14px);
+        }
+      }
+      @keyframes introWord {
+        to {
+          max-width: 300px;
+          opacity: 1;
+        }
+      }
+      /* El logo del header se anima cuando el telón ya está subiendo. */
+      html .brand-logo .brand-brace {
+        animation-delay: 1.55s;
+      }
+      html .brand-logo .brand-wordmark {
+        animation-delay: 1.9s;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .intro-loader {
+          display: none;
+        }
+        html .brand-logo .brand-brace,
+        html .brand-logo .brand-wordmark {
+          animation-delay: 0s;
+        }
+      }
+    </style>
   </head>
   <body>
+    <div class="intro-loader" aria-hidden="true">
+      <div class="intro-loader-mark">
+        <span class="intro-loader-brace">{</span>
+        <span class="intro-loader-word">
+          <span class="intro-loader-main">sCode</span>
+          <span class="intro-loader-sub">digital studio</span>
+        </span>
+        <span class="intro-loader-brace">}</span>
+      </div>
+    </div>
     <div id="root"></div>
     <script type="module" src="/src/main.jsx"></script>
   </body>
