@@ -2,9 +2,10 @@
 // Recibe el formulario de /contacto en el hosting (Apache + PHP).
 // En Vercel lo hace api/contacto.js; las dos versiones validan lo mismo.
 //
-// La clave secreta de Turnstile y los mails se leen de contacto-config.php,
-// fuera de public_html (ver contacto-config.example.php). Sin clave, el
-// captcha no se verifica en el servidor y quedan el honeypot y el límite por IP.
+// La contraseña SMTP, la clave secreta de Turnstile y los mails se leen de
+// contacto-config.php, fuera de public_html (ver contacto-config.example.php).
+// Sin clave de Turnstile el captcha no se verifica en el servidor y quedan el
+// honeypot y el límite por IP.
 
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
@@ -32,14 +33,19 @@ function configuracion()
     $defaults = [
         'turnstile_secret' => getenv('TURNSTILE_SECRET_KEY') ?: '',
         'to' => getenv('CONTACT_TO_EMAIL') ?: 'contact@scodedigital.com',
-        'from' => getenv('CONTACT_FROM_EMAIL') ?: 'noreply@scodedigital.com',
+        'from' => getenv('CONTACT_FROM_EMAIL') ?: 'contact@scodedigital.com',
         'from_name' => 'sCode',
+        // El hosting no deja usar mail(): se envía por SMTP con una casilla del dominio.
+        'smtp_host' => 'mail.scodedigital.com',
+        'smtp_port' => '465',
+        'smtp_user' => '',
+        'smtp_pass' => '',
     ];
     $file = dirname(__DIR__, 2) . '/contacto-config.php';
     if (is_readable($file)) {
         $custom = include $file;
         if (is_array($custom)) {
-            return array_merge($defaults, array_filter($custom, 'strlen'));
+            return array_merge($defaults, array_map('strval', array_filter($custom, function ($v) { return $v !== null && $v !== ''; })));
         }
     }
     return $defaults;
@@ -107,6 +113,106 @@ function captchaValido($secret, $token, $ip)
     return is_array($result) && !empty($result['success']);
 }
 
+function asuntoCodificado($asunto)
+{
+    return function_exists('mb_encode_mimeheader')
+        ? mb_encode_mimeheader($asunto, 'UTF-8', 'B')
+        : '=?UTF-8?B?' . base64_encode($asunto) . '?=';
+}
+
+function enviar($config, $asunto, $texto, $replyTo)
+{
+    if ($config['smtp_user'] !== '' && $config['smtp_pass'] !== '') {
+        return enviarSmtp($config, $asunto, $texto, $replyTo);
+    }
+    if (!function_exists('mail')) {
+        throw new RuntimeException('falta smtp_user/smtp_pass en contacto-config.php y mail() está deshabilitada');
+    }
+    $headers = implode("\r\n", [
+        'From: ' . $config['from_name'] . ' <' . $config['from'] . '>',
+        'Reply-To: ' . $replyTo,
+        'MIME-Version: 1.0',
+        'Content-Type: text/plain; charset=UTF-8',
+        'Content-Transfer-Encoding: 8bit',
+    ]);
+    return mail($config['to'], asuntoCodificado($asunto), $texto, $headers);
+}
+
+function smtpLeer($socket, $esperado)
+{
+    $respuesta = '';
+    while (($linea = fgets($socket, 515)) !== false) {
+        $respuesta .= $linea;
+        if (strlen($linea) < 4 || $linea[3] === ' ') {
+            break;
+        }
+    }
+    if ((int) substr($respuesta, 0, 3) !== $esperado) {
+        throw new RuntimeException('SMTP esperaba ' . $esperado . ' y recibió: ' . trim($respuesta));
+    }
+}
+
+function smtpComando($socket, $comando, $esperado)
+{
+    fwrite($socket, $comando . "\r\n");
+    smtpLeer($socket, $esperado);
+}
+
+function enviarSmtp($config, $asunto, $texto, $replyTo)
+{
+    $port = (int) $config['smtp_port'];
+    $host = $config['smtp_host'];
+    // El certificado del servidor de correo es *.ferozo.com: se valida la cadena, no el nombre.
+    $context = stream_context_create(['ssl' => ['verify_peer' => true, 'verify_peer_name' => false]]);
+    $socket = stream_socket_client(
+        ($port === 465 ? 'ssl://' : 'tcp://') . $host . ':' . $port,
+        $errno,
+        $errstr,
+        15,
+        STREAM_CLIENT_CONNECT,
+        $context
+    );
+    if (!$socket) {
+        throw new RuntimeException('SMTP no conecta: ' . $errstr);
+    }
+    stream_set_timeout($socket, 15);
+
+    try {
+        smtpLeer($socket, 220);
+        smtpComando($socket, 'EHLO scodedigital.com', 250);
+        if ($port !== 465) {
+            smtpComando($socket, 'STARTTLS', 220);
+            stream_socket_enable_crypto($socket, true, STREAM_CRYPTO_METHOD_TLS_CLIENT);
+            smtpComando($socket, 'EHLO scodedigital.com', 250);
+        }
+        smtpComando($socket, 'AUTH LOGIN', 334);
+        smtpComando($socket, base64_encode($config['smtp_user']), 334);
+        smtpComando($socket, base64_encode($config['smtp_pass']), 235);
+        smtpComando($socket, 'MAIL FROM:<' . $config['from'] . '>', 250);
+        smtpComando($socket, 'RCPT TO:<' . $config['to'] . '>', 250);
+        smtpComando($socket, 'DATA', 354);
+
+        $mensaje = implode("\r\n", [
+            'Date: ' . date('r'),
+            'From: ' . $config['from_name'] . ' <' . $config['from'] . '>',
+            'To: <' . $config['to'] . '>',
+            'Reply-To: ' . $replyTo,
+            'Subject: ' . asuntoCodificado($asunto),
+            'Message-ID: <' . bin2hex(random_bytes(12)) . '@scodedigital.com>',
+            'MIME-Version: 1.0',
+            'Content-Type: text/plain; charset=UTF-8',
+            'Content-Transfer-Encoding: base64',
+            '',
+            rtrim(chunk_split(base64_encode($texto), 76, "\r\n")),
+        ]);
+        smtpComando($socket, $mensaje . "\r\n.", 250);
+        fwrite($socket, "QUIT\r\n");
+    } finally {
+        fclose($socket);
+    }
+    return true;
+}
+
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
     responder(405, ['error' => 'Método no permitido']);
 }
@@ -151,25 +257,14 @@ $texto = implode("\n", [
     $mensaje,
 ]);
 
-$headers = implode("\r\n", [
-    'From: ' . $config['from_name'] . ' <' . $config['from'] . '>',
-    'Reply-To: ' . $email,
-    'MIME-Version: 1.0',
-    'Content-Type: text/plain; charset=UTF-8',
-    'Content-Transfer-Encoding: 8bit',
-]);
-
-$subject = function_exists('mb_encode_mimeheader')
-    ? mb_encode_mimeheader($asunto, 'UTF-8', 'B')
-    : '=?UTF-8?B?' . base64_encode($asunto) . '?=';
-
-$enviado = @mail($config['to'], $subject, $texto, $headers, '-f' . $config['from']);
-if (!$enviado) {
-    $enviado = @mail($config['to'], $subject, $texto, $headers);
+try {
+    $enviado = enviar($config, $asunto, $texto, $email);
+} catch (Throwable $error) {
+    error_log('contacto: ' . $error->getMessage());
+    $enviado = false;
 }
 
 if (!$enviado) {
-    error_log('contacto: mail() devolvió false');
     responder(500, ['error' => 'No se pudo enviar. Probá de nuevo en un momento o escribinos por WhatsApp.']);
 }
 
