@@ -32,10 +32,10 @@ function configuracion()
 {
     $defaults = [
         'turnstile_secret' => getenv('TURNSTILE_SECRET_KEY') ?: '',
-        'to' => getenv('CONTACT_TO_EMAIL') ?: 'contact@scodedigital.com',
+        'to' => getenv('CONTACT_TO_EMAIL') ?: 'scodedsolutions@gmail.com',
         'from' => getenv('CONTACT_FROM_EMAIL') ?: 'contact@scodedigital.com',
         'from_name' => 'sCode',
-        // El hosting no deja usar mail(): se envía por SMTP con una casilla del dominio.
+        // Con usuario y contraseña se envía por SMTP; si no, con mail().
         'smtp_host' => 'mail.scodedigital.com',
         'smtp_port' => '465',
         'smtp_user' => '',

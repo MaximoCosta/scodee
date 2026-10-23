@@ -3,7 +3,7 @@
 // (no adentro: ahí sería público). Lo lee public/api/contacto.php.
 return [
     // Contraseña de la casilla contact@scodedigital.com (Ferozo > Email > Cuentas).
-    // El hosting no permite mail() de PHP: sin esto el form no envía.
+    // Opcional: sin esto se usa mail() de PHP. Cargarla si los mails no llegan.
     'smtp_user' => 'contact@scodedigital.com',
     'smtp_pass' => '',
 
@@ -11,6 +11,6 @@ return [
     // Vacío: el captcha no se verifica en el servidor.
     'turnstile_secret' => '',
 
-    'to' => 'contact@scodedigital.com',
+    'to' => 'scodedsolutions@gmail.com',
     'from' => 'contact@scodedigital.com',
 ];

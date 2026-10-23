@@ -76,7 +76,7 @@ async function verifyTurnstile(token, ip) {
 
 async function sendEmail({ nombre, email, telefono, horario, mensaje }) {
   const apiKey = process.env.RESEND_API_KEY;
-  const to = process.env.CONTACT_TO_EMAIL || "contact@scodedigital.com";
+  const to = process.env.CONTACT_TO_EMAIL || "scodedsolutions@gmail.com";
   const from = process.env.CONTACT_FROM_EMAIL || "sCode <noreply@scodedigital.com>";
 
   if (!apiKey) {
